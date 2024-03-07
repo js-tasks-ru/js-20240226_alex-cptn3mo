@@ -10,7 +10,7 @@ export function createGetter(path) {
     let result = obj;
 
     for (const key of pathArray) {
-      if (result[key] === undefined) {
+      if (!result[key]) {
         return undefined;
       }
 
