@@ -1,5 +1,6 @@
 export default class SortableTable {
   element;
+  markerElement;
   headerConfig;
   data;
   subElements = {};
@@ -8,7 +9,15 @@ export default class SortableTable {
     this.headerConfig = headerConfig;
     this.data = data;
 
+    this.markerElement = this.createElement(this.createSortMarkerTemplate());
+
     this.render();
+  }
+
+  createElement(template) {
+    const element = document.createElement("div");
+    element.innerHTML = template;
+    return element.firstElementChild;
   }
 
   get header() {
@@ -59,10 +68,7 @@ export default class SortableTable {
   }
 
   render() {
-    const element = document.createElement("div");
-    element.innerHTML = this.template;
-
-    this.element = element.firstElementChild;
+    this.element = this.createElement(this.template);
     this.subElements = this.getSubElements(this.element);
   }
 
@@ -89,6 +95,8 @@ export default class SortableTable {
     this.subElements.body.innerHTML = sortedData
       .map((item) => this.getRow(item))
       .join("");
+
+    this.updateHeader(field, order);
   }
 
   sortData(field, order) {
@@ -104,6 +112,23 @@ export default class SortableTable {
 
       return direction * a[field].localeCompare(b[field], "ru");
     });
+  }
+
+  createSortMarkerTemplate() {
+    return `
+    <span data-element="arrow" class="sortable-table__sort-arrow">
+      <span class="sort-arrow"></span>
+    </span>
+  `;
+  }
+
+  updateHeader(columnId, order) {
+    this.markerElement.remove();
+    const columnElement = this.subElements.header.querySelector(
+      `[data-id=${columnId}]`
+    );
+    columnElement.append(this.markerElement);
+    columnElement.dataset.order = order;
   }
 
   remove() {
